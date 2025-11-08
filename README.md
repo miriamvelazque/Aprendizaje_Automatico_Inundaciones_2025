@@ -61,7 +61,7 @@ La entrega final incluye este repositorio, los notebooks, los datasets, el video
 
 ## ✍️ Autora
 
-**Miriam Velazquez**  
+**Miriam Velazque**  
 Estudiante de la Tecnicatura de Ciencias de Datos e Inteligencia Artificial  
 Politécnico Malvinas Argentinas
 

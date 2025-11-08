@@ -20,8 +20,17 @@ Desarrollar un modelo de clasificación binaria que permita distinguir entre zon
 ```
 ## 📁 Estructura del Repositorio
 
-AA_Inundaciones_2025/ ├── data/ │ ├── raw/ # Datos originales (.csv, .geojson, .tiff) │ └── processed/ # Dataset limpio para modelado ├── notebooks/ │ ├── 01_EDA.ipynb # Análisis exploratorio │ └── 02_Modelos.ipynb # Modelado supervisado ├── src/ │ ├── features/ # Funciones para ingeniería de variables │ └── models/ # Entrenamiento y evaluación ├── reports/ │ └── figures/ # Gráficos generados ├── environment.yml # Entorno reproducible ├── README.md # Documentación del proyecto
-```
+```AA_Inundaciones_2025/ ├── data/ │ ├── raw/ # Datos originales (.csv, .geojson, .tiff) │ └── processed/ # Dataset limpio para modelado ├── notebooks/ │ ├── 01_EDA.ipynb # Análisis exploratorio │ └── 02_Modelos.ipynb # Modelado supervisado ├── src/ │ ├── features/ # Funciones para ingeniería de variables │ └── models/ # Entrenamiento y evaluación ├── reports/ │ └── figures/ # Gráficos generados ├── environment.yml # Entorno reproducible ├── README.md # Documentación del proyecto```
+
+## ⚙️ Instalación del Entorno Reproducible
+
+Este proyecto incluye el archivo `environment.yml` para facilitar la creación de un entorno conda que garantice la reproducibilidad.
+
+Para crear el entorno y activarlo, ejecutar los siguientes comandos:
+
+```bash
+conda env create -f environment.yml
+conda activate aa_inundaciones_2025
 
 ## 📊 Dataset
 

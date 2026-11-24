@@ -1,86 +1,97 @@
-# Predicción del Tipo de Afectación en Zonas Inundables – Proyecto de Aprendizaje Automático
+# 🌊 Predicción del tipo de afectación en zonas inundables de Argentina
 
-Este repositorio documenta el desarrollo de un modelo de clasificación supervisada para identificar el tipo de afectación (total o parcial) en zonas inundables, utilizando variables geoespaciales, ambientales y sociales.
+Clasificación supervisada para predecir si una zona inundable se inunda **parcial** o **totalmente**. El modelo usa variables geoespaciales y ambientales construidas a partir de datos públicos de barrios populares (DU-Techo / RENABAP).
 
----
+Proyecto final de la materia **Aprendizaje Automático**. Tecnicatura Superior en Ciencia de Datos e IA, Politécnico Malvinas Argentinas (2025).
 
-## 🎯 Objetivo del Proyecto
-
-Desarrollar un modelo de clasificación binaria que permita distinguir entre zonas inundables **totalmente afectadas** y aquellas **parcialmente afectadas**, a partir de variables ambientales y sociales extraídas de fuentes públicas.
-
-
-### Objetivos específicos:
-- Integrar datos públicos sobre zonas inundables, curvas de nivel y factores sociales relevantes para el modelado supervisado.
-- Extraer características relevantes para el modelado supervisado.
-- Entrenar y evaluar modelos de clasificación con métricas como precisión, recall y F1-score.
-- Presentar resultados visuales e interpretables que aporten valor al análisis territorial.
+🎥 **[Video de presentación del proyecto](https://drive.google.com/file/d/1-oxXYCW6Q08yY81oNox5pTJvXcqrL_CQ/view?usp=sharing)** · 📄 **[Informe final (PDF)](reports/informe_final.pdf)**
 
 ---
+
+## 🎯 Problema
+
+Saber qué zonas de un barrio sufren **inundación total** sirve para priorizar evacuaciones, asignar recursos y planificar obras. El objetivo es estimar ese riesgo a partir de información territorial disponible públicamente, sin relevamientos en el lugar.
+
+- **Variable objetivo:** `se_inunda_binaria` (1 = parcial, 2 = total). Las clases están balanceadas: 50 % / 50 %.
+- **Registros:** 2.746 zonas inundables.
+
+## 🗺️ Datos y variables construidas
+
+| Fuente | Capa | Uso |
+|---|---|---|
+| [datos.gob.ar — Factores de riesgo en barrios populares](https://www.datos.gob.ar/dataset/habitat-factores-riesgo-barrios-populares-gran-buenos-aires) | Zonas inundables | Variable objetivo y frecuencia de inundación |
+| | Cuerpos de agua | Distancia de cada zona al cuerpo de agua más cercano |
+| | Cursos de agua | Distancia al curso de agua más cercano |
+| | Microbasurales | Cantidad de microbasurales cercanos |
+
+**Procesamiento geoespacial (GeoPandas / Shapely):**
+1. Conversión de geometrías WKT.
+2. Reproyección a un sistema métrico.
+3. Cálculo de centroides.
+4. Distancias a la capa más cercana.
+5. Conteo de puntos en un radio.
+
+También se corrigieron errores tipográficos y se codificaron las variables categóricas (por ejemplo, la frecuencia de inundación).
+
+## 🧪 Modelos y resultados
+
+Se usó una partición estratificada de 80 % para entrenamiento y 20 % para test (550 zonas). Clase positiva: **inundación total**.
+
+| Modelo | Accuracy | Precision | Recall | F1 | ROC AUC |
+|---|---|---|---|---|---|
+| Regresión Logística | **0,587** | 0,584 | **0,607** | **0,595** | 0,604 |
+| Random Forest | 0,580 | **0,585** | 0,549 | 0,566 | **0,612** |
+| KNN (k = 7) | 0,573 | 0,573 | 0,567 | 0,570 | — |
+| Árbol de Decisión (prof. 4) | 0,560 | 0,568 | 0,560 | 0,547 | — |
+
+| Matriz de confusión — Random Forest | Curva ROC — Random Forest |
+|---|---|
+| ![Matriz RF](reports/figures/matriz_confusion_random_forest.png) | ![ROC RF](reports/figures/roc_random_forest.png) |
+
+### Lectura de los resultados
+
+- Los cuatro modelos quedan en un rango parecido (≈56–59 % de exactitud, AUC ≈ 0,61). Ningún algoritmo sobresale: **el límite está en la información que aportan las variables**, no en el modelo.
+- Las cuatro predictoras (distancias al agua, microbasurales y frecuencia) explican solo una parte de por qué una zona se inunda totalmente. Faltan factores determinantes como la **altimetría**, la pendiente, los desagües y las precipitaciones.
+- Se eligió **Random Forest** como modelo final por su mejor capacidad de discriminación (AUC 0,612) y precisión. **Regresión Logística** es la alternativa si se prioriza detectar más zonas de inundación total (mayor recall).
+
+### Próximos pasos
+- Incorporar un modelo digital de elevación (altura y pendiente) y datos de precipitación.
+- Ajustar el umbral de decisión según el costo de no detectar una inundación total.
+- Validar con datos de otras regiones.
+
+## 📁 Estructura
 
 ```
-## 📁 Estructura del Repositorio
+├── data/
+│   ├── raw/              # Capas originales (CSV, GeoJSON, GPKG, SHP)
+│   └── processed/        # dataset_modelo_inundaciones.csv (listo para modelar)
+├── notebooks/
+│   ├── 01_exploracion_y_variables_geoespaciales.ipynb
+│   ├── 02_limpieza_dataset_modelado.ipynb
+│   └── 03_modelado_y_evaluacion.ipynb
+├── reports/
+│   ├── informe_final.pdf
+│   └── figures/          # Matrices de confusión y curvas ROC
+├── docs/entregas/        # Entregas parciales de la materia
+└── requirements.txt
+```
 
-```AA_Inundaciones_2025/ ├── data/ │ ├── raw/ # Datos originales (.csv, .geojson, .tiff) │ └── processed/ # Dataset limpio para modelado ├── notebooks/ │ ├── 01_EDA.ipynb # Análisis exploratorio │ └── 02_Modelos.ipynb # Modelado supervisado ├── src/ │ ├── features/ # Funciones para ingeniería de variables │ └── models/ # Entrenamiento y evaluación ├── reports/ │ └── figures/ # Gráficos generados ├── environment.yml # Entorno reproducible ├── README.md # Documentación del proyecto```
+## ⚙️ Cómo ejecutarlo
 
-## ⚙️ Instalación del Entorno Reproducible
-
-Este proyecto incluye el archivo `environment.yml` para facilitar la creación de un entorno conda que garantice la reproducibilidad.
-
-Para crear el entorno y activarlo, ejecutar los siguientes comandos:
+Los notebooks se desarrollaron en **Google Colab**. Para correrlos en local:
 
 ```bash
-conda env create -f environment.yml
-conda activate aa_inundaciones_2025
+pip install -r requirements.txt
+jupyter notebook
+```
 
-## 📊 Dataset
+El notebook 03 parte directamente de `data/processed/dataset_modelo_inundaciones.csv`.
 
-Se utilizaron datos públicos provenientes de:
+## 🛠️ Tecnologías
 
-- DU-Tech (datos.gob.ar)
-- RENABAP (01/10/2025)
-- Curvas de nivel (.geojson)
-- Datos meteorológicos (.csv)
+Python · pandas · NumPy · GeoPandas · Shapely · scikit-learn · Matplotlib · Seaborn · Google Colab
 
-Los archivos originales se encuentran en `data/raw/` y el dataset procesado para modelado en `data/processed/`.
+## 👩‍💻 Autora
 
----
-
-## 🧪 Modelado y Evaluación
-
-> *Esta sección será completada en la Entrega 3.*
-
-- Algoritmos utilizados: *(por definir)*
-- Librería principal: `scikit-learn`
-- Métricas evaluadas: Accuracy, Precision, Recall, F1-score
-- Visualizaciones: Matriz de confusión, curvas ROC, importancia de variables
-
----
-
-## 📌 Entregas
-
-Este proyecto se desarrolló en tres entregas:
-
-1. **Entrega 1**: Formulación del objetivo y contexto del problema
-2. **Entrega 2**: Descripción del dataset y origen de los datos
-3. **Entrega 3**: Presentación del modelo, análisis exploratorio y resultados
-
-La entrega final incluye este repositorio, los notebooks, los datasets, el video explicativo y la documentación completa.
-
----
-
-## ✍️ Autora
-
-**Miriam Velazque**  
-Estudiante de la Tecnicatura de Ciencias de Datos e Inteligencia Artificial  
-Politécnico Malvinas Argentinas
-
----
-
-## ⚠️ Nota Académica
-
-Este proyecto es original y cumple con las pautas del parcial. No se permite el plagio ni la copia de trabajos previos. Cualquier similitud con otros proyectos es mera coincidencia.
-
----
-
-<small>Proyecto basado en la plantilla <a href="https://drivendata.github.io/cookiecutter-data-science/" target="_blank">Cookiecutter Data Science</a>.</small>
-tar resultados visuales e interpretables que aporten valor al análisis territorial.
+**Miriam Alicia Velazque**, Técnica Superior en Ciencia de Datos e Inteligencia Artificial (CPMA, Río Grande, Tierra del Fuego).
+[LinkedIn](https://www.linkedin.com/in/miriam-alicia-velazque) · [GitHub](https://github.com/miriamvelazque)
